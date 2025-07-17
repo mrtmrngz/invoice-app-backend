@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum PaymentMethod {
+  CASH
+  CREDIT_CARD
+}
+
+enum Status {
+  PAID
+  CANCELLED
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  password  String
+  firstName String
+  lastName  String
+  phone     String?
+  address   String?   @db.Text
+  invoices  Invoice[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Invoice {
+  id            Int           @id @default(autoincrement())
+  title         String
+  description   String
+  userId        Int?
+  user          User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  customerId    Int?
+  customer      Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  total         Float
+  subTotal      Float
+  invoiceNumber String
+  paymentMethod PaymentMethod
+  items         Items[]
+  status        Status        @default(PAID)
+  taxRate       Float
+  discount      Float         @default(0)
+  terms         String        @db.Text
+  dueDate       DateTime
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model Customer {
+  id          Int       @id @default(autoincrement())
+  email       String    @unique
+  firstName   String
+  lastName    String
+  phone       String?
+  address     String?   @db.Text
+  companyName String?
+  taxNumber   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  invoices    Invoice[]
+}
+
+model Items {
+  id        Int      @id @default(autoincrement())
+  title     String
+  unitPrice Float
+  quantity  Int      @default(1)
+  subTotal  Float
+  taxRate   Float    @default(0)
+  discount  Float    @default(0)
+  invoiceId Int?
+  invoice   Invoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+}

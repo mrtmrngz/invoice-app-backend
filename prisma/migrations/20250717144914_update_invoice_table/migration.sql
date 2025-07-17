@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `invoice` MODIFY `status` ENUM('PAID', 'CANCELLED') NOT NULL DEFAULT 'PAID';
